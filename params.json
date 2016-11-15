@@ -1,0 +1,6 @@
+{
+  "name": "Homework 8 - Topic Modeling",
+  "tagline": "Amazon Fine Food Reviews",
+  "body": "Summary\r\n\r\nIn this project, I run an LDA topic models analysis for Amazon Fine Food Reviews (available from: http://jmcauley.ucsd.edu/data/amazon/). I used the R package lda and I visualize the output using LDAvis.\r\n\r\nThe R Source Code is Available at: https://github.com/dduwill/Product-Review/blob/master/Assignment%208.R\r\n\r\nThe LDA topic models analysis for top 10 relavant topics is Available at: https://dduwill.github.io/Product-Review/vis",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
