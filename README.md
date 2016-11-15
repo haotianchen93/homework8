@@ -9,7 +9,7 @@ In this project, I run an LDA topic modeling analysis for Amazon Fine Food Revie
 
 The R Source Code is Available at: https://github.com/haotianchen93/homework8/blob/master/Homework%208.R
 
-The LDA topic models analysis for top 10 relavant topics is Available at: https://haotianchen93.github.com/homework8/vis
+The LDA topic models analysis for top 10 relavant topics is Available at: https://haotianchen93.github.io/homework8/vis
 
 ##Result Analysis
 
