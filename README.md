@@ -7,9 +7,9 @@ New York University
 
 In this project, I run an LDA topic modeling analysis for Amazon Fine Food Reviews (available from: https://www.kaggle.com/snap/amazon-fine-food-reviews). I used the R package lda and I visualize the output using LDAvis.
 
-The R Source Code is Available at: https://github.com/haotianchen93/homework8/blob/master/Homework%208.R
+The R Code is available at: https://github.com/haotianchen93/homework8/blob/master/Homework%208.R
 
-The LDA topic models analysis for top 10 relavant topics is Available at: https://haotianchen93.github.io/homework8/vis
+The LDA topic models analysis for top 10 relavant topics is available at: https://haotianchen93.github.io/homework8/vis
 
 ##Result Analysis
 
