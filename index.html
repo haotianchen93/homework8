@@ -19,13 +19,153 @@
     </section>
 
     <section class="main-content">
-      <p>Summary</p>
+      <h1>
+<a id="homework8" class="anchor" href="#homework8" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>homework8</h1>
 
-<p>In this project, I run an LDA topic models analysis for Amazon Fine Food Reviews (available from: <a href="http://jmcauley.ucsd.edu/data/amazon/">http://jmcauley.ucsd.edu/data/amazon/</a>). I used the R package lda and I visualize the output using LDAvis.</p>
+<h2>
+<a id="summary" class="anchor" href="#summary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Summary</h2>
 
-<p>The R Source Code is Available at: <a href="https://github.com/dduwill/Product-Review/blob/master/Assignment%208.R">https://github.com/dduwill/Product-Review/blob/master/Assignment%208.R</a></p>
+<p>In this project, I run an LDA topic modeling analysis for Amazon Fine Food Reviews (available from: <a href="https://www.kaggle.com/snap/amazon-fine-food-reviews">https://www.kaggle.com/snap/amazon-fine-food-reviews</a>). I used the R package lda and I visualize the output using LDAvis.</p>
+
+<p>The R Source Code is Available at: <a href="https://github.com/haotianchen93/homework8/blob/master/Homework%208.R">https://github.com/haotianchen93/homework8/blob/master/Homework%208.R</a></p>
 
 <p>The LDA topic models analysis for top 10 relavant topics is Available at: <a href="https://dduwill.github.io/Product-Review/vis">https://dduwill.github.io/Product-Review/vis</a></p>
+
+<h2>
+<a id="result-analysis" class="anchor" href="#result-analysis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Result Analysis</h2>
+
+<p>Topic 5 &amp; 7 have large overlaps, because these customer reviews focused on information of taste and flavor. Topic 2 &amp; 6 have some overlaps, mostly focused on various dimensions of differnet kinds of food. Topic 1 &amp; 3 also overlap, and these two focused on the service Amazon provided, such as box, time, and price. Topic 4/8/9/10 are isolated, primarily because these four topics focused on different food: sugar, pet food, tea and coffee respectively. So we can see that these reviews are very comprehensive and varied.</p>
+
+<h2>
+<a id="the-data" class="anchor" href="#the-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The data</h2>
+
+<p>First, I manually download the review .csv file to my mac and load the .csv file in R studio.</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c">#Topic Modeling: Amazon Fine Food Reviews</span>
+
+library(<span class="pl-smi">dplyr</span>)
+require(<span class="pl-smi">magrittr</span>)
+library(<span class="pl-smi">tm</span>)
+library(<span class="pl-smi">ggplot2</span>)
+library(<span class="pl-smi">stringr</span>)
+library(<span class="pl-smi">NLP</span>)
+library(<span class="pl-smi">openNLP</span>)
+
+<span class="pl-c">#load csv file</span>
+<span class="pl-smi">precorpus</span><span class="pl-k">&lt;-</span> read.csv(<span class="pl-s"><span class="pl-pds">"</span>/Users/chenhaotian/Desktop/amazon reviews.csv<span class="pl-pds">"</span></span>, <span class="pl-v">header</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>, <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+
+<span class="pl-c">#passing Full Text to variable review</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">precorpus</span><span class="pl-k">$</span><span class="pl-smi">Text</span></pre></div>
+
+<h2>
+<a id="pre-processing" class="anchor" href="#pre-processing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pre-processing</h2>
+
+<p>Before fitting a topic model, I need to tokenize the text and remove all the punctuations and spaces. In particular, we use the English stop words from the "SMART" and some customized stop words.</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c">#Cleaning corpus</span>
+<span class="pl-smi">stop_words</span> <span class="pl-k">&lt;-</span> stopwords(<span class="pl-s"><span class="pl-pds">"</span>SMART<span class="pl-pds">"</span></span>)
+<span class="pl-c">## additional junk words showing up in the data</span>
+<span class="pl-smi">stop_words</span> <span class="pl-k">&lt;-</span> c(<span class="pl-smi">stop_words</span>, <span class="pl-s"><span class="pl-pds">"</span>said<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>the<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>also<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>say<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>just<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>like<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>for<span class="pl-pds">"</span></span>, 
+                <span class="pl-s"><span class="pl-pds">"</span>us<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>can<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>may<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>now<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>year<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>according<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>mr<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>br<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>www<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>http<span class="pl-pds">"</span></span>)
+<span class="pl-smi">stop_words</span> <span class="pl-k">&lt;-</span> tolower(<span class="pl-smi">stop_words</span>)
+
+
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>'<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>) <span class="pl-c"># remove apostrophes</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>[[:punct:]]<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>)  <span class="pl-c"># replace punctuation with space</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>[[:cntrl:]]<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>)  <span class="pl-c"># replace control characters with space</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>^[[:space:]]+<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>) <span class="pl-c"># remove whitespace at beginning of documents</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>[[:space:]]+$<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>) <span class="pl-c"># remove whitespace at end of documents</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> gsub(<span class="pl-s"><span class="pl-pds">"</span>[^a-zA-Z -]<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>, <span class="pl-smi">review</span>) <span class="pl-c"># allows only letters</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> tolower(<span class="pl-smi">review</span>)  <span class="pl-c"># force to lowercase</span>
+
+<span class="pl-c">## get rid of blank docs</span>
+<span class="pl-smi">review</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">review</span>[<span class="pl-smi">review</span> <span class="pl-k">!=</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>]
+
+<span class="pl-c"># tokenize on space and output as a list:</span>
+<span class="pl-smi">doc.list</span> <span class="pl-k">&lt;-</span> strsplit(<span class="pl-smi">review</span>, <span class="pl-s"><span class="pl-pds">"</span>[[:space:]]+<span class="pl-pds">"</span></span>)
+
+<span class="pl-c"># compute the table of terms:</span>
+<span class="pl-smi">term.table</span> <span class="pl-k">&lt;-</span> table(unlist(<span class="pl-smi">doc.list</span>))
+<span class="pl-smi">term.table</span> <span class="pl-k">&lt;-</span> sort(<span class="pl-smi">term.table</span>, <span class="pl-v">decreasing</span> <span class="pl-k">=</span> <span class="pl-c1">TRUE</span>)
+
+
+<span class="pl-c"># remove terms that are stop words or occur fewer than 5 times:</span>
+<span class="pl-smi">del</span> <span class="pl-k">&lt;-</span> names(<span class="pl-smi">term.table</span>) <span class="pl-k">%in%</span> <span class="pl-smi">stop_words</span> <span class="pl-k">|</span> <span class="pl-smi">term.table</span> <span class="pl-k">&lt;</span> <span class="pl-c1">5</span>
+<span class="pl-smi">term.table</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">term.table</span>[<span class="pl-k">!</span><span class="pl-smi">del</span>]
+<span class="pl-smi">term.table</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">term.table</span>[names(<span class="pl-smi">term.table</span>) <span class="pl-k">!=</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>]
+<span class="pl-smi">vocab</span> <span class="pl-k">&lt;-</span> names(<span class="pl-smi">term.table</span>)
+
+<span class="pl-c"># now put the documents into the format required by the lda package:</span>
+<span class="pl-en">get.terms</span> <span class="pl-k">&lt;-</span> <span class="pl-k">function</span>(<span class="pl-smi">x</span>) {
+  <span class="pl-smi">index</span> <span class="pl-k">&lt;-</span> match(<span class="pl-smi">x</span>, <span class="pl-smi">vocab</span>)
+  <span class="pl-smi">index</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">index</span>[<span class="pl-k">!</span>is.na(<span class="pl-smi">index</span>)]
+  rbind(as.integer(<span class="pl-smi">index</span> <span class="pl-k">-</span> <span class="pl-c1">1</span>), as.integer(rep(<span class="pl-c1">1</span>, length(<span class="pl-smi">index</span>))))
+}
+<span class="pl-smi">documents</span> <span class="pl-k">&lt;-</span> lapply(<span class="pl-smi">doc.list</span>, <span class="pl-smi">get.terms</span>)</pre></div>
+
+<h2>
+<a id="using-r-package-lda-for-model-fitting" class="anchor" href="#using-r-package-lda-for-model-fitting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using R package 'lda' for model fitting</h2>
+
+<p>The object document is a large list where each element represents one document. After creating this list, we compute a few statistics about the corpus, such as length and vocabulary counts:</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># Compute some statistics related to the data set:</span>
+<span class="pl-smi">D</span> <span class="pl-k">&lt;-</span> length(<span class="pl-smi">documents</span>)  <span class="pl-c"># number of documents (1)</span>
+<span class="pl-smi">W</span> <span class="pl-k">&lt;-</span> length(<span class="pl-smi">vocab</span>)  <span class="pl-c"># number of terms in the vocab (1741)</span>
+<span class="pl-smi">doc.length</span> <span class="pl-k">&lt;-</span> sapply(<span class="pl-smi">documents</span>, <span class="pl-k">function</span>(<span class="pl-smi">x</span>) sum(<span class="pl-smi">x</span>[<span class="pl-c1">2</span>, ]))  <span class="pl-c"># number of tokens per document [312, 288, 170, 436, 291, ...]</span>
+<span class="pl-smi">N</span> <span class="pl-k">&lt;-</span> sum(<span class="pl-smi">doc.length</span>)  <span class="pl-c"># total number of tokens in the data (56196)</span>
+<span class="pl-smi">term.frequency</span> <span class="pl-k">&lt;-</span> as.integer(<span class="pl-smi">term.table</span>) </pre></div>
+
+<p>Next, we set up a topic model with 10 topics, relatively diffuse priors for the topic-term distributions ($\eta$ = 0.02) and document-topic distributions ($\alpha$ = 0.02), and we set the collapsed Gibbs sampler to run for 3,000 iterations (slightly conservative to ensure convergence). A visual inspection of fit$log.likelihood shows that the MCMC algorithm has converged after 3,000 iterations. This block of code takes about 50 seconds to run on a Mac using a 2.4GHz i7 processor and 8GB RAM.</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># MCMC and model tuning parameters:</span>
+<span class="pl-smi">K</span> <span class="pl-k">&lt;-</span> <span class="pl-c1">10</span>
+<span class="pl-smi">G</span> <span class="pl-k">&lt;-</span> <span class="pl-c1">3000</span>
+<span class="pl-smi">alpha</span> <span class="pl-k">&lt;-</span> <span class="pl-c1">0.02</span>
+<span class="pl-smi">eta</span> <span class="pl-k">&lt;-</span> <span class="pl-c1">0.02</span>
+
+<span class="pl-c"># Fit the model:</span>
+library(<span class="pl-smi">lda</span>)
+set.seed(<span class="pl-c1">357</span>)
+<span class="pl-smi">t1</span> <span class="pl-k">&lt;-</span> Sys.time()
+<span class="pl-smi">fit</span> <span class="pl-k">&lt;-</span> lda.collapsed.gibbs.sampler(<span class="pl-v">documents</span> <span class="pl-k">=</span> <span class="pl-smi">documents</span>, <span class="pl-v">K</span> <span class="pl-k">=</span> <span class="pl-smi">K</span>, <span class="pl-v">vocab</span> <span class="pl-k">=</span> <span class="pl-smi">vocab</span>, 
+                                   <span class="pl-v">num.iterations</span> <span class="pl-k">=</span> <span class="pl-smi">G</span>, <span class="pl-v">alpha</span> <span class="pl-k">=</span> <span class="pl-smi">alpha</span>, 
+                                   <span class="pl-v">eta</span> <span class="pl-k">=</span> <span class="pl-smi">eta</span>, <span class="pl-v">initial</span> <span class="pl-k">=</span> <span class="pl-c1">NULL</span>, <span class="pl-v">burnin</span> <span class="pl-k">=</span> <span class="pl-c1">0</span>,
+                                   <span class="pl-v">compute.log.likelihood</span> <span class="pl-k">=</span> <span class="pl-c1">TRUE</span>)
+<span class="pl-smi">t2</span> <span class="pl-k">&lt;-</span> Sys.time()
+<span class="pl-c">## display runtime</span>
+<span class="pl-smi">t2</span> <span class="pl-k">-</span> <span class="pl-smi">t1</span>  </pre></div>
+
+<h2>
+<a id="visualizing-the-fitted-model-with-ldavis" class="anchor" href="#visualizing-the-fitted-model-with-ldavis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Visualizing the fitted model with LDAvis</h2>
+
+<p>To visualize the result using LDAvis, we will need estimates of the document-topic distributions, which we denote by the $D \times K$ matrix $\theta$, and the set of topic-term distributions, which we denote by the $K \times W$ matrix $\phi$. We estimate the "smoothed" versions of these distributions ("smoothed" means that we've incorporated the effects of the priors into the estimates) by cross-tabulating the latent topic assignments from the last iteration of the collapsed Gibbs sampler with the documents and the terms, respectively, and then adding pseudocounts according to the priors. A better estimator might average over multiple iterations of the Gibbs sampler (after convergence, assuming that the MCMC is sampling within a local mode and there is no label switching occurring), but we won't worry about that for now.</p>
+
+<p>We've already computed the number of tokens per document and the frequency of the terms across the entire corpus. We save these, along with $\phi$, $\theta$, and vocab, in a list as the data object reviews.LDA.</p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">theta</span> <span class="pl-k">&lt;-</span> t(apply(<span class="pl-smi">fit</span><span class="pl-k">$</span><span class="pl-smi">document_sums</span> <span class="pl-k">+</span> <span class="pl-smi">alpha</span>, <span class="pl-c1">2</span>, <span class="pl-k">function</span>(<span class="pl-smi">x</span>) <span class="pl-smi">x</span><span class="pl-k">/</span>sum(<span class="pl-smi">x</span>)))
+<span class="pl-smi">phi</span> <span class="pl-k">&lt;-</span> t(apply(t(<span class="pl-smi">fit</span><span class="pl-k">$</span><span class="pl-smi">topics</span>) <span class="pl-k">+</span> <span class="pl-smi">eta</span>, <span class="pl-c1">2</span>, <span class="pl-k">function</span>(<span class="pl-smi">x</span>) <span class="pl-smi">x</span><span class="pl-k">/</span>sum(<span class="pl-smi">x</span>)))
+
+<span class="pl-smi">review_for_LDA</span> <span class="pl-k">&lt;-</span> <span class="pl-k">list</span>(<span class="pl-v">phi</span> <span class="pl-k">=</span> <span class="pl-smi">phi</span>,
+                     <span class="pl-v">theta</span> <span class="pl-k">=</span> <span class="pl-smi">theta</span>,
+                     <span class="pl-v">doc.length</span> <span class="pl-k">=</span> <span class="pl-smi">doc.length</span>,
+                     <span class="pl-v">vocab</span> <span class="pl-k">=</span> <span class="pl-smi">vocab</span>,
+                     <span class="pl-v">term.frequency</span> <span class="pl-k">=</span> <span class="pl-smi">term.frequency</span>)</pre></div>
+
+<p>Now we're ready to call the createJSON() function in LDAvis. This function will return a character string representing a JSON object used to populate the visualization. The createJSON() function computes topic frequencies, inter-topic distances, and projects topics onto a two-dimensional plane to represent their similarity to each other. It also loops through a grid of values of a tuning parameter, $0 \leq \lambda \leq 1$, that controls how the terms are ranked for each topic, where terms are listed in decreasing of relevance, where the relevance of term $w$ to topic $t$ is defined as $\lambda \times p(w \mid t) + (1 - \lambda) \times p(w \mid t)/p(w)$. Values of $\lambda$ near 1 give high relevance rankings to frequent terms within a given topic, whereas values of $\lambda$ near zero give high relevance rankings to exclusive terms within a topic. The set of all terms which are ranked among the top-R most relevant terms for each topic are pre-computed by the createJSON() function and sent to the browser to be interactively visualized using D3 as part of the JSON object.</p>
+
+<div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">LDAvis</span>)
+library(<span class="pl-smi">servr</span>)
+
+<span class="pl-c"># create the JSON object to feed the visualization:</span>
+<span class="pl-smi">json</span> <span class="pl-k">&lt;-</span> createJSON(<span class="pl-v">phi</span> <span class="pl-k">=</span> <span class="pl-smi">review_for_LDA</span><span class="pl-k">$</span><span class="pl-smi">phi</span>, 
+                   <span class="pl-v">theta</span> <span class="pl-k">=</span> <span class="pl-smi">review_for_LDA</span><span class="pl-k">$</span><span class="pl-smi">theta</span>, 
+                   <span class="pl-v">doc.length</span> <span class="pl-k">=</span> <span class="pl-smi">review_for_LDA</span><span class="pl-k">$</span><span class="pl-smi">doc.length</span>, 
+                   <span class="pl-v">vocab</span> <span class="pl-k">=</span> <span class="pl-smi">review_for_LDA</span><span class="pl-k">$</span><span class="pl-smi">vocab</span>, 
+                   <span class="pl-v">term.frequency</span> <span class="pl-k">=</span> <span class="pl-smi">review_for_LDA</span><span class="pl-k">$</span><span class="pl-smi">term.frequency</span>)
+
+serVis(<span class="pl-smi">json</span>, <span class="pl-v">out.dir</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>vis<span class="pl-pds">'</span></span>, <span class="pl-v">open.browser</span> <span class="pl-k">=</span> <span class="pl-c1">TRUE</span>)</pre></div>
+
+<p>The serVis() function can take json and serve the result in a variety of ways. Here we'll write json to a file within the 'vis' directory (along with other HTML and JavaScript required to render the page). You can see the result at: <a href="https://dduwill.github.io/Product-Review/vis">https://dduwill.github.io/Product-Review/vis</a>.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/haotianchen93/homework8">Homework 8 - Topic Modeling</a> is maintained by <a href="https://github.com/haotianchen93">haotianchen93</a>.</span>
